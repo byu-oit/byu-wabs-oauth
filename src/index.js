@@ -124,9 +124,6 @@ async function evaluateTokenResult (debug, res) {
       try {
         const [ , payload ] = body.id_token.split('.')
         const decoded = JSON.parse((new Buffer(payload, 'base64')).toString('utf8'))
-
-        const decoded = await jwt.decodeJWT(body.id_token)
-        if (!decoded) throw Error('OpenID token failed verification')
         result.resourceOwner = {
           atHash: decoded.at_hash,
           aud: decoded.aud,
@@ -139,7 +136,6 @@ async function evaluateTokenResult (debug, res) {
           jwt: body.id_token,
           netId: decoded.net_id,
           personId: decoded.person_id,
-          preferredFirstName: decoded.preferred_first_name,
           prefix: decoded.prefix,
           restOfName: decoded.rest_of_name,
           sortName: decoded.sort_name,
