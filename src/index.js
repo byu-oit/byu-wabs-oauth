@@ -121,28 +121,35 @@ async function evaluateTokenResult (debug, res) {
     }
     if (body.refresh_token) result.refreshToken = body.refresh_token
     if (body.id_token) {
-      const decoded = await jwt.decodeJWT(body.id_token)
-      if (!decoded) throw Error('OpenID token failed verification')
-      result.resourceOwner = {
-        atHash: decoded.raw.at_hash,
-        aud: decoded.raw.aud,
-        authTime: decoded.raw.auth_time,
-        azp: decoded.raw.azp,
-        byuId: decoded.raw.byu_id,
-        exp: decoded.raw.exp,
-        iat: decoded.raw.iat,
-        iss: decoded.raw.iss,
-        jwt: body.id_token,
-        netId: decoded.raw.net_id,
-        personId: decoded.raw.person_id,
-        preferredFirstName: decoded.raw.preferred_first_name,
-        prefix: decoded.raw.prefix,
-        restOfName: decoded.raw.rest_of_name,
-        sortName: decoded.raw.sort_name,
-        sub: decoded.raw.sub,
-        suffix: decoded.raw.suffix,
-        surname: decoded.raw.surname,
-        surnamePosition: decoded.raw.surname_position
+      try {
+        const [ , payload ] = body.id_token.split('.')
+        const decoded = JSON.parse((new Buffer(payload, 'base64')).toString('utf8'))
+
+        const decoded = await jwt.decodeJWT(body.id_token)
+        if (!decoded) throw Error('OpenID token failed verification')
+        result.resourceOwner = {
+          atHash: decoded.at_hash,
+          aud: decoded.aud,
+          authTime: decoded.auth_time,
+          azp: decoded.azp,
+          byuId: decoded.byu_id,
+          exp: decoded.exp,
+          iat: decoded.iat,
+          iss: decoded.iss,
+          jwt: body.id_token,
+          netId: decoded.net_id,
+          personId: decoded.person_id,
+          preferredFirstName: decoded.preferred_first_name,
+          prefix: decoded.prefix,
+          restOfName: decoded.rest_of_name,
+          sortName: decoded.sort_name,
+          sub: decoded.sub,
+          suffix: decoded.suffix,
+          surname: decoded.surname,
+          surnamePosition: decoded.surname_position
+        }
+      } catch (err) {
+        debug('unable to decode id token: ' + err.toString)
       }
     }
     return result
