@@ -7,6 +7,7 @@ const expect = require('chai').expect
 const http = require('http')
 const puppeteer = require('puppeteer')
 const { default: EnvSsm } = require('@byu-oit/env-ssm')
+const { SSM } = require('@aws-sdk/client-ssm')
 
 process.on('unhandledRejection', err => {
   console.error(err.stack)
@@ -15,9 +16,7 @@ process.on('unhandledRejection', err => {
 // Requires login to the byu-oit-devx-prd AWS account.
 // `aws sso login --profile byu-oit-devx-prd`
 // The following environment variables need to be set
-// ENV_SSM_PATHS=/byu-wabs-oauth
 // AWS_PROFILE=byu-oit-devx-prd
-// AWS_REGION=us-west-2
 
 describe('byu-wabs-oauth', function () {
   let config
@@ -25,7 +24,8 @@ describe('byu-wabs-oauth', function () {
 
   // get WSO2 credentials from AWS parameter store
   before(async () => {
-    const env = await EnvSsm({ processEnv: false })
+    const ssm = new SSM({ region: 'us-west-2' })
+    const env = await EnvSsm({ ssm, paths: ['/byu-wabs-oauth'], processEnv: false })
     config = {
       key: env.get('consumer_key').required().asString(),
       secret: env.get('consumer_secret').required().asString(),
