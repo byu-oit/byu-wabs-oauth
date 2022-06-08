@@ -38,3 +38,7 @@ node_modules
 
 # Package Lock
 package-lock.json
+
+# Terraform
+.terraform
+*.tfvars

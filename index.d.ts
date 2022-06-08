@@ -1,6 +1,8 @@
+import * as ByuJwt from 'byu-jwt'
+
 export = byuOAuth
 
-declare function byuOAuth (clientId: string, clientSecret: string): Promise<byuOAuth.ByuOAuth>
+declare function byuOAuth (clientId: string, clientSecret: string, options?: ByuJwt.Options): Promise<byuOAuth.ByuOAuth>
 
 declare namespace byuOAuth {
 

@@ -269,8 +269,40 @@ This object has information about the current token as well as methods for manag
 
 ## Testing
 
-1. Open a terminal and log into AWS using [awslogin](https://github.com/byu-oit/awslogin).
-2. Select the `dev-oit-byu` account.
-3. Change the directory to this project's directory.
-4. Run: `npm install`
-5. Run: `npm test`
+#### Run the tests
+1. In the terminal, log into the BYU DevX AWS Account
+  ```shell
+  aws sso login --profile byu-oit-devx-prd
+  ```
+2. In this root of this project, run:
+  ```shell 
+  npm install
+  npm test
+  ```
+
+#### Update environment variables used in the tests
+1. Create the file `./iac/vars.tfvars`.
+2. Copy this template into that file.
+  ```terraform
+  consumer_key = ""
+  consumer_secret = ""
+  callback_url = ""
+  net_id = ""
+  password = ""
+  ```
+3. Copy and paste the values from the parameter store into this file.
+4. Update the values you want to change.
+5. Set the AWS_PROFILE environment variable.
+  ```shell
+  export AWS_PROFILE=byu-oit-devx-prd
+  ```
+6. Login to the BYU DevX AWS Account.
+  ```shell
+  aws sso login --profile $AWS_PROFILE
+  ```
+7. From within the `./iac` directory, apply the changes in Terraform.
+  > Ensure you use same version of terraform (as of right now v1.2.2 is latest).
+  ```shell
+  terraform init
+  terraform apply --var-file vars.tfvars
+  ```
