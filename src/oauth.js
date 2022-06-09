@@ -1,5 +1,5 @@
 'use strict'
-const byuJwt = require('byu-jwt')
+const ByuJwt = require('byu-jwt')
 const Debug = require('debug')
 const request = require('./request')
 
@@ -10,13 +10,13 @@ const debug = {
   revoke: Debug('byu-oauth:revoke'),
   wellKnown: Debug('byu-oauth:well-known')
 }
-const jwt = byuJwt()
 
-let wellKnownObject = {}
+const wellKnownObject = {}
 let wellKnownTimeoutId
 
-module.exports = async function (clientId, clientSecret) {
-  await getTokenEndpoints()
+module.exports = async function (clientId, clientSecret, options) {
+  const byuJwt = ByuJwt(options)
+  await getTokenEndpoints(byuJwt.openIdConfigUrl)
 
   const result = Object.create(wellKnownObject)
   Object.assign(result, {
@@ -122,8 +122,8 @@ async function evaluateTokenResult (debug, res) {
     if (body.refresh_token) result.refreshToken = body.refresh_token
     if (body.id_token) {
       try {
-        const [ , payload ] = body.id_token.split('.')
-        const decoded = JSON.parse((new Buffer(payload, 'base64')).toString('utf8'))
+        const [, payload] = body.id_token.split('.')
+        const decoded = JSON.parse((Buffer.from(payload, 'base64')).toString('utf8'))
         result.resourceOwner = {
           atHash: decoded.at_hash,
           aud: decoded.aud,
@@ -158,10 +158,10 @@ async function evaluateTokenResult (debug, res) {
   }
 }
 
-async function getTokenEndpoints () {
+async function getTokenEndpoints (wellKnown) {
   // make request to open id well known url
   debug.wellKnown('get fresh well known data')
-  const res = await request({ url: byuJwt.WELL_KNOWN_URL })
+  const res = await request({ url: wellKnown })
   const data = typeof res.body === 'object' ? res.body : JSON.parse(res.body)
 
   // cache important data
