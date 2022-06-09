@@ -28,7 +28,8 @@ $ npm install byu-wabs-oauth
 
 ### Client Grant Token
 
-Use this grant type for communicating from one server to another where a specific user’s permission to access data is not required.
+Use this grant type for communicating from one server to another where a specific user’s permission to access data is
+not required.
 
 ```js
 const byuOAuth = require('byu-wabs-oauth')
@@ -51,21 +52,18 @@ const byuOAuth = require('byu-wabs-oauth')
 const querystring = require('querystring')
 const redirectUrl = 'http://localhost:3000/'
 
-// get BYU OAuth instance
-const oauthPromise = byuOAuth('<client_id>', '<client_secret>')
-
 // start a server that will listen for the OAuth code grant redirect
 const server = http.createServer(async (req, res) => {
-  const oauth = await oauthPromise
-  const qs = querystring.parse(req.url.split('?')[1] || '')      
-    
+  const oauth = await byuOAuth('<client_id>', '<client_secret>')
+  const qs = querystring.parse(req.url.split('?')[1] || '')
+
   // if there is no code then redirect browser to authorization url
   if (!qs.code) {
     const url = await oauth.getAuthorizationUrl(redirectUrl)
     res.setHeader('Location', url)
     res.end()
 
-  // if there is a code then use the code to get the code grant token
+    // if there is a code then use the code to get the code grant token
   } else {
     const token = await oauth.getCodeGrantToken(qs.code, redirectUrl)
     res.write(token.accessToken)
@@ -78,22 +76,25 @@ const listener = server.listen(3000)
 
 ## Create a BYU OAuth object
 
-`byuWabsOAuth (clientId, clientSecret) : Promise<object>`
+`byuWabsOAuth (clientId: string, clientSecret: string, options: ByuJWT.Options) : Promise<ByuOAuth>`
 
 **Parameters**
 
-| Parameter | Type | Required |  Description |
-| --------- | ---- | -------- |  ----------- |
-| **clientId** | `string` | Yes | The client ID or consumer key |
-| **clientSecret** | `string` | Yes | The client secret or consumer secret |
+| Parameter        | Type             | Required | Description                                                                                                                  |
+|------------------|------------------|----------|------------------------------------------------------------------------------------------------------------------------------|
+| **clientId**     | `string`         | Yes      | The client ID or consumer key                                                                                                |
+| **clientSecret** | `string`         | Yes      | The client secret or consumer secret                                                                                         |
+| **options**      | `ByuJWT.Options` | No       | The [ByuJWT Options](https://github.com/byu-oit/byu-jwt-nodejs/blob/8d3fe95170c7b2f1a149e29c8123946586d3daa4/index.d.ts#L12) |
 
 **Returns** a Promise that resolves to an object with the following methods and properties:
 
 Methods:
 
 - [getAuthorizationUrl](#getauthorizationurl) - Get the URL that will provide an OAuth code grant code.
-- [getClientGrantToken](#getclientgranttoken) - Get a client grant [token](#byu-oauth-token). Use this grant type for communicating from one server to another where a specific user’s permission to access data is not required.
-- [getAuthCodeGrantToken](#getauthcodegranttoken) - Get a code grant [token](#byu-oauth-token). Use this grant type if you need the user's authorization to access data.
+- [getClientGrantToken](#getclientgranttoken) - Get a client grant [token](#byu-oauth-token). Use this grant type for
+  communicating from one server to another where a specific user’s permission to access data is not required.
+- [getAuthCodeGrantToken](#getauthcodegranttoken) - Get a code grant [token](#byu-oauth-token). Use this grant type if
+  you need the user's authorization to access data.
 - [refreshToken](#refreshtoken) - Use a refresh token to get a new [token](#byu-oauth-token) object.
 - [revokeToken](#revoketoken) - Use to revoke an access token and / or refresh token.
 
@@ -125,10 +126,10 @@ Get the URL that needs to be visited to acquire an auth code grant code.
 
 **Parameters**
 
-| Parameter | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| **redirectUri** | `string` | Yes | The URL that the API manager will redirect to after the user has authorized the application. |
-| state | `string` | No | State information to add to the URL. You can read this state information when the `redirectUri` is called. |
+| Parameter       | Type     | Required | Description                                                                                                |
+|-----------------|----------|----------|------------------------------------------------------------------------------------------------------------|
+| **redirectUri** | `string` | Yes      | The URL that the API manager will redirect to after the user has authorized the application.               |
+| state           | `string` | No       | State information to add to the URL. You can read this state information when the `redirectUri` is called. |
 
 **Returns** a Promise that resolves to the URL.
 
@@ -136,10 +137,10 @@ Get the URL that needs to be visited to acquire an auth code grant code.
 
 ```js
 ;(async () => {
-    const byuOAuth = require('byu-wabs-oauth')
-    const oauth = await byuOauth('<client_id>', '<client_secret>')
+  const byuOAuth = require('byu-wabs-oauth')
+  const oauth = await byuOauth('<client_id>', '<client_secret>')
 
-    const url = await oauth.getAuthorizationUrl('https://my-server.com', 'state info')
+  const url = await oauth.getAuthorizationUrl('https://my-server.com', 'state info')
 })()
 ```
 
@@ -159,10 +160,10 @@ None
 
 ```js
 ;(async () => {
-    const byuOAuth = require('byu-wabs-oauth')
-    const oauth = await byuOauth('<client_id>', '<client_secret>')
+  const byuOAuth = require('byu-wabs-oauth')
+  const oauth = await byuOauth('<client_id>', '<client_secret>')
 
-    const token = await oauth.getClientGrantToken()
+  const token = await oauth.getClientGrantToken()
 })()
 ```
 
@@ -174,10 +175,10 @@ Get a code grant [token](#byu-oauth-token).
 
 **Parameters**
 
-| Parameter | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| **code** | `string` | Yes |  The code grant code that signifies authorization |
-| **redirectUri** | `string` | Yes | The original URI specified when calling the [getAuthorizationUrl](#getauthorizationurl) function. |
+| Parameter       | Type     | Required | Description                                                                                       |
+|-----------------|----------|----------|---------------------------------------------------------------------------------------------------|
+| **code**        | `string` | Yes      | The code grant code that signifies authorization                                                  |
+| **redirectUri** | `string` | Yes      | The original URI specified when calling the [getAuthorizationUrl](#getauthorizationurl) function. |
 
 **Returns** a Promise that resolves to a [token](#byu-oauth-token).
 
@@ -193,10 +194,10 @@ Get a new access token using a refresh token.
 
 **Parameters**
 
-| Parameter | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| **accessToken** | `string` | Yes | The access token to refresh. |
-| **refreshToken** | `string` | Yes | The associated refresh token. |
+| Parameter        | Type     | Required  | Description                   |
+|------------------|----------|-----------|-------------------------------|
+| **accessToken**  | `string` | Yes       | The access token to refresh.  |
+| **refreshToken** | `string` | Yes       | The associated refresh token. |
 
 **Returns** a Promise that resolves to a [token](#byu-oauth-token).
 
@@ -204,10 +205,10 @@ Get a new access token using a refresh token.
 
 ```js
 ;(async () => {
-    const byuOAuth = require('byu-wabs-oauth')
-    const oauth = await byuOauth('<client_id>', '<client_secret>')
+  const byuOAuth = require('byu-wabs-oauth')
+  const oauth = await byuOauth('<client_id>', '<client_secret>')
 
-    const token = await oauth.refreshToken('<access_token>', '<refresh_token>')
+  const token = await oauth.refreshToken('<access_token>', '<refresh_token>')
 })()
 ```
 
@@ -219,10 +220,10 @@ Revoke an access token and / or a refresh token.
 
 **Parameters**
 
-| Parameter | Type | Required | Default | Description |
-| --------- | ---- | -------- | ------- | ----------- |
-| **accessToken** | `string` | Yes | N/A | The access token to revoke. |
-| refreshToken | `string` | No | N/A | The associated refresh token to also revoke. |
+| Parameter       | Type     | Required | Default | Description                                  |
+|-----------------|----------|----------|---------|----------------------------------------------|
+| **accessToken** | `string` | Yes      | N/A     | The access token to revoke.                  |
+| refreshToken    | `string` | No       | N/A     | The associated refresh token to also revoke. |
 
 **Returns** a Promise that resolves to undefined.
 
@@ -230,9 +231,9 @@ Revoke an access token and / or a refresh token.
 
 ```js
 ;(async () => {
-    const byuOAuth = require('byu-wabs-oauth')
-    const oauth = await byuOauth('<client_id>', '<client_secret>')
-    await oauth.revokeToken('<access_token>', '<refresh_token>')
+  const byuOAuth = require('byu-wabs-oauth')
+  const oauth = await byuOauth('<client_id>', '<client_secret>')
+  await oauth.revokeToken('<access_token>', '<refresh_token>')
 })()
 ```
 
@@ -240,10 +241,12 @@ Revoke an access token and / or a refresh token.
 
 This object has information about the current token as well as methods for managing the token. These are the properties:
 
-- accessToken - A string that has the most recent access token. This value will be `undefined` if the token has been revoked.
+- accessToken - A string that has the most recent access token. This value will be `undefined` if the token has been
+  revoked.
 - expiresAt - A Date object that represents when the token will expire.
 - expiresIn - The number of milliseconds until the token expires.
-- refreshToken - A string representing the refresh token. This value will be `undefined` for client grant tokens, although client grant tokens can still be refreshed using the `refresh` function on this object.
+- refreshToken - A string representing the refresh token. This value will be `undefined` for client grant tokens,
+  although client grant tokens can still be refreshed using the `refresh` function on this object.
 - resourceOwner - Only valid for code grant tokens, this object contains the resource owner's properties:
     - atHash: string
     - aud: Array<string>
@@ -270,38 +273,51 @@ This object has information about the current token as well as methods for manag
 ## Testing
 
 #### Run the tests
+
 1. In the terminal, log into the BYU DevX AWS Account
+
   ```shell
   aws sso login --profile byu-oit-devx-prd
   ```
+
 2. In this root of this project, run:
+
   ```shell 
   npm install
   npm test
   ```
 
 #### Update environment variables used in the tests
+
 1. Create the file `./iac/vars.tfvars`.
 2. Copy this template into that file.
+
   ```terraform
-  consumer_key = ""
-  consumer_secret = ""
-  callback_url = ""
-  net_id = ""
-  password = ""
+  consumer_key  = ""
+consumer_secret = ""
+callback_url    = ""
+net_id          = ""
+password        = ""
   ```
+
 3. Copy and paste the values from the parameter store into this file.
 4. Update the values you want to change.
 5. Set the AWS_PROFILE environment variable.
+
   ```shell
   export AWS_PROFILE=byu-oit-devx-prd
   ```
+
 6. Login to the BYU DevX AWS Account.
+
   ```shell
   aws sso login --profile $AWS_PROFILE
   ```
+
 7. From within the `./iac` directory, apply the changes in Terraform.
-  > Ensure you use same version of terraform (as of right now v1.2.2 is latest).
+
+> Ensure you use same version of terraform (as of right now v1.2.2 is latest).
+
   ```shell
   terraform init
   terraform apply --var-file vars.tfvars
