@@ -19,6 +19,11 @@
   "engines": {
     "node": ">=7.6.0"
   },
+  "files": [
+    "src",
+    "index.d.ts",
+    "index.js"
+  ],
   "scripts": {
     "test": "jest --forceExit",
     "lint": "standard --verbose | snazzy",
