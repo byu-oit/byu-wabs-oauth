@@ -22,8 +22,28 @@ env:
   aws_secret_name: "byu_oit_devx_prd_secret"
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.node_version }}
+
+      - name: Install Node Dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm lint
+
   test:
-    name: Test App
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

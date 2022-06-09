@@ -1,9 +1,8 @@
 'use strict'
-/* global describe before beforeEach after it */
+/* global describe beforeAll afterAll it expect */
 
 process.env.DEBUG = 'wabs*'
 const Oauth = require('../index')
-const expect = require('chai').expect
 const http = require('http')
 const puppeteer = require('puppeteer')
 const { default: EnvSsm } = require('@byu-oit/env-ssm')
@@ -23,7 +22,7 @@ describe('byu-wabs-oauth', function () {
   let oauth
 
   // get WSO2 credentials from AWS parameter store
-  before(async () => {
+  beforeAll(async () => {
     const ssm = new SSM({ region: 'us-west-2' })
     const env = await EnvSsm({ ssm, paths: ['/byu-wabs-oauth'], processEnv: false })
     config = {
@@ -39,7 +38,7 @@ describe('byu-wabs-oauth', function () {
   describe('getClientGrantToken', () => {
     it('can get token', async () => {
       const token = await oauth.getClientGrantToken()
-      expect(token.accessToken).to.be.a('string')
+      expect(typeof token.accessToken).toBe('string')
     })
   })
 
@@ -47,14 +46,14 @@ describe('byu-wabs-oauth', function () {
     let listener
     let token
 
-    before(function (done) {
+    beforeAll(function (done) {
       const port = parseInt(new URL(config.callback).port)
 
       // start a server that will listen for the OAuth code grant redirect
       const server = http.createServer((req, res) => {
         const match = /^\/\?code=(.+)$/.exec(req.url)
         if (match) {
-          const [ , code ] = match
+          const [, code] = match
           res.statusCode = 200
           oauth.getAuthCodeGrantToken(code, config.callback.toString())
             .then(t => {
@@ -77,12 +76,9 @@ describe('byu-wabs-oauth', function () {
     })
 
     // start the browser and log in
-    before(async function () {
+    beforeAll(async function () {
       token = null
-
-      this.timeout(6000) // Defaults to 2000, and we need more time for the headless browser
       const url = await oauth.getAuthorizationUrl(config.callback)
-
       const browser = await puppeteer.launch({ headless: true })
       const page = await browser.newPage()
       await page.goto(url) // go to API manager which will redirect to CAS
@@ -103,32 +99,32 @@ describe('byu-wabs-oauth', function () {
 
       // close the browser
       await browser.close()
-    })
+    }, 6000)
 
-    after(async () => {
+    afterAll(async () => {
       // shut down the server
       await listener.close()
     })
 
     it('can get token', () => {
-      expect(token.accessToken).to.be.a('string')
+      expect(typeof token.accessToken).toBe('string')
     })
 
     it('has correct identity', () => {
-      expect(token.resourceOwner.sortName).to.equal('Ithica, Oauth')
+      expect(token.resourceOwner.sortName).toEqual('Ithica, Oauth')
     })
 
     it('can refresh token', async () => {
       const before = { accessToken: token.accessToken, refreshToken: token.refreshToken }
       token = await oauth.refreshToken(token.refreshToken)
       const after = { accessToken: token.accessToken, refreshToken: token.refreshToken }
-      expect(token.accessToken).to.be.a('string')
-      expect(after.accessToken).not.to.equal(before.accessToken)
-      expect(after.refreshToken).not.to.equal(before.refreshToken)
+      expect(typeof token.accessToken).toBe('string')
+      expect(after.accessToken).not.toEqual(before.accessToken)
+      expect(after.refreshToken).not.toEqual(before.refreshToken)
     })
 
     it('can revoke token', async () => {
-      await oauth.revokeToken(token.accessToken, token.refreshToken)
+      expect(async () => await oauth.revokeToken(token.accessToken, token.refreshToken)).not.toThrow()
     })
   })
 })

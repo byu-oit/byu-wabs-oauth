@@ -11,7 +11,7 @@ const debug = {
   wellKnown: Debug('byu-oauth:well-known')
 }
 
-let wellKnownObject = {}
+const wellKnownObject = {}
 let wellKnownTimeoutId
 
 module.exports = async function (clientId, clientSecret, options) {
@@ -122,7 +122,7 @@ async function evaluateTokenResult (debug, res) {
     if (body.refresh_token) result.refreshToken = body.refresh_token
     if (body.id_token) {
       try {
-        const [ , payload ] = body.id_token.split('.')
+        const [, payload] = body.id_token.split('.')
         const decoded = JSON.parse((Buffer.from(payload, 'base64')).toString('utf8'))
         result.resourceOwner = {
           atHash: decoded.at_hash,

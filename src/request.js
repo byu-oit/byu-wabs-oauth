@@ -2,7 +2,6 @@
 const debug = require('debug')('byu-oauth:request')
 const http = require('http')
 const https = require('https')
-const querystring = require('querystring')
 
 const rxJson = /^application\/(?:[^+]+\+)?json(?:;|$)/
 const rxUrl = /^(https?):\/\/([^:/?]+)(?::(\d+))?([/?].*)?$/
@@ -11,10 +10,10 @@ module.exports = function (options) {
   return new Promise((resolve, reject) => {
     // validate input parameters
     if (!options) return reject(Error('Missing require parameter: options'))
-    if (options.hasOwnProperty('body') && typeof options.body !== 'object' && typeof options.body !== 'string') return reject(Error('Options "body" property must be a string or object'))
-    if (options.hasOwnProperty('headers') && typeof options.headers !== 'object') return reject(Error('Options "headers" property must be an object'))
-    if (options.hasOwnProperty('method') && typeof options.method !== 'string') return reject(Error('Options "method" property must be a string'))
-    if (options.hasOwnProperty('query') && typeof options.query !== 'object') return reject(Error('Options "query" property must be an object'))
+    if (Object.hasOwnProperty.call(options, 'body') && typeof options.body !== 'object' && typeof options.body !== 'string') return reject(Error('Options "body" property must be a string or object'))
+    if (Object.hasOwnProperty.call(options, 'headers') && typeof options.headers !== 'object') return reject(Error('Options "headers" property must be an object'))
+    if (Object.hasOwnProperty.call(options, 'method') && typeof options.method !== 'string') return reject(Error('Options "method" property must be a string'))
+    if (Object.hasOwnProperty.call(options, 'query') && typeof options.query !== 'object') return reject(Error('Options "query" property must be an object'))
     if (typeof options.url !== 'string') return reject(Error('Options "url" property must be a string'))
 
     // add default options values
@@ -23,7 +22,7 @@ module.exports = function (options) {
 
     const match = rxUrl.exec(options.url)
     if (!match) return reject(Error('Invalid URL specified'))
-    let [ , protocol, hostname, port, path ] = match
+    let [, protocol, hostname, port, path] = match
 
     // finish building the path
     if (!path.startsWith('/')) path = '/' + path
@@ -45,7 +44,7 @@ module.exports = function (options) {
 
     // if the body is an object and there is no content-type then convert to application/json
     let body
-    if (options.hasOwnProperty('body')) body = options.body
+    if (Object.hasOwnProperty.call(options, 'body')) body = options.body
 
     const config = {
       hostname,
@@ -87,4 +86,3 @@ module.exports = function (options) {
     req.end()
   })
 }
-
