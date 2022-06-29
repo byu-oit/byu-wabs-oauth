@@ -99,7 +99,7 @@ describe('byu-wabs-oauth', function () {
 
       // close the browser
       await browser.close()
-    }, 6000)
+    }, 10000)
 
     afterAll(async () => {
       // shut down the server
