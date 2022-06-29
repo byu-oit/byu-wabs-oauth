@@ -190,7 +190,7 @@ async function getTokenEndpoints (wellKnown) {
   // set cache timeout
   wellKnownTimeoutId = setTimeout(() => {
     debug.wellKnown('cache expired')
-    getTokenEndpoints()
+    getTokenEndpoints(wellKnown)
       .catch(err => {
         debug.wellKnown('unable to refresh well known information')
         console.error(err.stack)
