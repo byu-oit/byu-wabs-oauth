@@ -18,7 +18,11 @@ provider "aws" {
 }
 
 locals {
-  name = "byu-wabs-oauth"
+  name    = "byu-wabs-oauth"
+  gh_org  = "byu-oit"
+  gh_repo = "byu-wabs-oauth"
+  env     = "prd"
+
   tags = {
     name = local.name
     repo = "https://github.com/byu-oit/${local.name}"
@@ -63,4 +67,20 @@ resource "aws_ssm_parameter" "password" {
   type  = "SecureString"
   value = var.password
   tags  = local.tags
+}
+
+module "acs" {
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v4.0.0"
+}
+
+module "gha_role" {
+  source                         = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                        = "5.17.0"
+  create_role                    = true
+  role_name                      = "${local.name}-${local.env}-gha"
+  provider_url                   = module.acs.github_oidc_provider.url
+  role_permissions_boundary_arn  = module.acs.role_permissions_boundary.arn
+  role_policy_arns               = module.acs.power_builder_policies[*].arn
+  oidc_fully_qualified_audiences = ["sts.amazonaws.com"]
+  oidc_subjects_with_wildcards   = ["repo:${local.gh_org}/${local.gh_repo}:*"]
 }
