@@ -188,6 +188,7 @@ async function getTokenEndpoints (wellKnown) {
   }
 
   // set cache timeout
+  // NOTE: added 'unref' to allow scripts to finish when not running package within a server
   wellKnownTimeoutId = setTimeout(() => {
     debug.wellKnown('cache expired')
     getTokenEndpoints(wellKnown)
@@ -195,7 +196,7 @@ async function getTokenEndpoints (wellKnown) {
         debug.wellKnown('unable to refresh well known information')
         console.error(err.stack)
       })
-  }, cacheDuration * 1000)
+  }, cacheDuration * 1000).unref()
 }
 
 function revoke (context, token, type) {
@@ -209,9 +210,3 @@ function revoke (context, token, type) {
     url: context.revocationEndpoint
   })
 }
-
-process.on('exit', () => clearTimeout(wellKnownTimeoutId)) // app is closing
-process.on('SIGINT', () => clearTimeout(wellKnownTimeoutId)) // catches ctrl+c event
-process.on('SIGBREAK', () => clearTimeout(wellKnownTimeoutId)) // catches Windows ctrl+c event
-process.on('SIGUSR1', () => clearTimeout(wellKnownTimeoutId)) // catches "kill pid"
-process.on('SIGUSR2', () => clearTimeout(wellKnownTimeoutId)) // catches "kill pid"
