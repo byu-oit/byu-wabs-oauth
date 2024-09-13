@@ -12,7 +12,6 @@ const debug = {
 }
 
 const wellKnownObject = {}
-let wellKnownTimeoutId
 
 module.exports = async function (clientId, clientSecret, options) {
   const byuJwt = ByuJwt(options)
@@ -189,7 +188,7 @@ async function getTokenEndpoints (wellKnown) {
 
   // set cache timeout
   // NOTE: added 'unref' to allow scripts to finish when not running package within a server
-  wellKnownTimeoutId = setTimeout(() => {
+  setTimeout(() => {
     debug.wellKnown('cache expired')
     getTokenEndpoints(wellKnown)
       .catch(err => {
